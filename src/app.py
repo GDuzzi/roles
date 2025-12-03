@@ -1,5 +1,23 @@
 import streamlit as st
 import pandas as pd
+import os
+import pickle
+
+# -------------------------------------
+# FUNÇÕES DE SALVAMENTO
+# -------------------------------------
+SAVE_FILE = "roles.pkl"
+
+def save_roles(data):
+    with open(SAVE_FILE, "wb") as f:
+        pickle.dump(data, f)
+
+def load_roles():
+    if os.path.exists(SAVE_FILE):
+        with open(SAVE_FILE, "rb") as f:
+            return pickle.load(f)
+    return []
+
 
 # -------------------------------------
 # PAGE CONFIG
@@ -29,7 +47,6 @@ st.markdown("""
 
 * { font-family: "Poppins", sans-serif !important; }
 
-/* Remove containers padrão do Streamlit */
 div[data-testid="stVerticalBlock"],
 div[data-testid="stVerticalBlock"] > div,
 div[data-testid="stForm"],
@@ -46,12 +63,10 @@ div[data-testid="stAppViewBlockContainer"] {
 
 section.main { padding-top: 0 !important; }
 
-/* Fundo */
 html, body, div[data-testid="stAppViewContainer"] {
     background: radial-gradient(circle at top left, #fbe3ef, #f5d6e8, #eed0e0);
 }
 
-/* HEADER */
 .header {
     text-align: center;
     margin-top: 40px;
@@ -77,7 +92,6 @@ html, body, div[data-testid="stAppViewContainer"] {
 
 .spacing { height: 35px; }
 
-/* FORM CARD */
 .form-card {
     background: var(--white-glass);
     padding: 35px 40px;
@@ -89,29 +103,27 @@ html, body, div[data-testid="stAppViewContainer"] {
     margin: 0 auto;
 }
 
-/* Inputs */
 input, textarea {
     border-radius: 12px !important;
     border: 1px solid rgba(210,106,152,0.35) !important;
     background: #fff7fa !important;
 }
 
-/* Foco */
 input:focus, textarea:focus {
     border-color: var(--accent) !important;
     box-shadow: 0 0 8px rgba(210,106,152,0.35);
 }
 
-/* Sliders */
 .stSlider > div > div > div {
     background: var(--accent) !important;
 }
 
-/* Botão */
 .stButton > button {
     background: linear-gradient(135deg, var(--rose), var(--accent));
     padding: 14px 32px;
-    width: 100%;
+    width: 60%;
+    display: block;
+    margin: 0 auto;
     color: white !important;
     border-radius: 14px;
     border: none;
@@ -121,7 +133,6 @@ input:focus, textarea:focus {
 }
 .stButton > button:hover { transform: scale(1.05); }
 
-/* Divider */
 .divider {
     margin: 40px auto 20px auto;
     width: 60%;
@@ -137,12 +148,6 @@ input:focus, textarea:focus {
     margin-bottom: 15px;
 }
 
-/* CARD HEADER (Customizado para o botão de cada rolê) */
-/* A estilização do botão de rolê foi colocada no loop para poder usar o index.
-   Mantenho a estilização original do card-header para o caso de uso futuro, 
-   mas ela não está sendo aplicada diretamente nos botões do histórico no código original.
-   Vou remover a classe .card-header por não estar sendo usada no loop e duplicar o estilo */
-
 </style>
 """, unsafe_allow_html=True)
 
@@ -150,12 +155,11 @@ input:focus, textarea:focus {
 # -------------------------------------
 # ESTADO
 # -------------------------------------
-# Inicializa as variáveis de estado de sessão
 if "roles" not in st.session_state:
-    st.session_state.roles = [] # Lista de dicionários para armazenar os dados dos rolês
+    st.session_state.roles = load_roles()
 
 if "open_cards" not in st.session_state:
-    st.session_state.open_cards = {} # Dicionário para controlar quais cards estão abertos
+    st.session_state.open_cards = {i: False for i in range(len(st.session_state.roles))}
 
 
 # -------------------------------------
@@ -174,47 +178,42 @@ st.markdown("<div class='spacing'></div>", unsafe_allow_html=True)
 # -------------------------------------
 # FORMULÁRIO
 # -------------------------------------
-# Início do card de formulário
-# st.markdown('<div class="form-card">', unsafe_allow_html=True)
 st.markdown("<div class='section-title'>Adicionar novo rolê ❤️</div>", unsafe_allow_html=True)
 
-# Colunas para Nome e Data
 col1, col2 = st.columns(2)
 with col1:
     role = st.text_input("Nome do rolê")
 with col2:
     date = st.date_input("Data", format="DD/MM/YYYY")
 
-# Colunas para as Notas (Sliders)
 col3, col4 = st.columns(2)
 with col3:
     nota_voce = st.slider("Jovem", 0, 10, 7)
 with col4:
     nota_namorada = st.slider("Senhorita", 0, 10, 7)
 
-# Área de Comentário
 comentario = st.text_area("Comentário sobre o rolê")
 
-# Botão de Adicionar
 add = st.button("Adicionar")
-# Fim do card de formulário
-st.markdown("</div>", unsafe_allow_html=True)
 
 
 # -------------------------------------
 # SALVAR
 # -------------------------------------
 if add and role.strip() != "":
-    # Adiciona o novo rolê à lista de estado
-    st.session_state.roles.append({
+    novo = {
         "Rolê": role,
-        "Data": date.strftime("%d/%m/%Y"), # Formata a data para string
+        "Data": date.strftime("%d/%m/%Y"),
         "Sua nota": nota_voce,
         "Nota dela": nota_namorada,
         "Comentário": comentario
-    })
-    # Inicializa o estado de expansão do novo card como fechado (False)
+    }
+
+    st.session_state.roles.append(novo)
+    save_roles(st.session_state.roles)
+
     st.session_state.open_cards[len(st.session_state.roles) - 1] = False
+
     st.success("Adicionado com muito amor! 💘")
 
 
@@ -228,17 +227,13 @@ if len(st.session_state.roles) == 0:
     st.info("Nenhum rolê adicionado ainda! 💗")
 
 else:
-    # Cria um DataFrame do Pandas a partir da lista de rolês
     df = pd.DataFrame(st.session_state.roles)
     st.markdown("<div class='spacing'></div>", unsafe_allow_html=True)
 
-    # Itera sobre cada rolê no DataFrame
     for index, row in df.iterrows():
 
-        # Calcula a média das notas
         media = (row["Sua nota"] + row["Nota dela"]) / 2
 
-        # Define cores e status com base na média
         if media >= 7:
             bg = "rgba(180, 255, 200, 0.55)"
             border = "rgba(0, 180, 70, 0.55)"
@@ -246,45 +241,12 @@ else:
             bg = "rgba(255, 170, 170, 0.55)"
             border = "rgba(255, 80, 80, 0.55)"
 
-        titulo = row["Rolê"]
+        btn = st.button(row["Rolê"], key=f"btn_{index}")
 
-        # Botão que funciona como cabeçalho de um card expansível
-        # Usamos uma key única para o botão
-        btn = st.button(titulo, key=f"btn_{index}")
-
-        st.markdown(f"""
-        <style>
-        /* Estilização específica para o botão do rolê, simulando um card header */
-        button[data-testid="baseButton-secondary"][data-testid="button-{index}"] {{
-            width: 100% !important;
-            background: rgba(255,255,255,0.6);
-            padding: 18px 24px;
-            border-radius: 16px;
-            font-size: 20px;
-            font-weight: 700;
-            color: #3b2f36;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.1);
-            border: 1px solid rgba(255,255,255,0.6);
-            margin-bottom: 10px;
-            cursor: pointer;
-        }}
-        button[data-testid="baseButton-secondary"][data-testid="button-{index}"]:hover {{
-            background: rgba(255,255,255,0.8);
-            transform: scale(1.02);
-        }}
-        </style>
-        """, unsafe_allow_html=True)
-
-
-        # Lógica para abrir/fechar o card (estado de sessão)
         if btn:
-            # Inverte o estado atual do card (aberto/fechado)
             st.session_state.open_cards[index] = not st.session_state.open_cards.get(index, False)
 
-        # Exibe o conteúdo do card se estiver aberto
         if st.session_state.open_cards.get(index, False):
-
-            # Conteúdo formatado com Markdown/HTML
             st.markdown(f"""
             <div style="
                 background:{bg};
