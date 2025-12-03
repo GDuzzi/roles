@@ -47,6 +47,7 @@ st.markdown("""
 
 * { font-family: "Poppins", sans-serif !important; }
 
+/* Remove containers padrão do Streamlit */
 div[data-testid="stVerticalBlock"],
 div[data-testid="stVerticalBlock"] > div,
 div[data-testid="stForm"],
@@ -63,10 +64,12 @@ div[data-testid="stAppViewBlockContainer"] {
 
 section.main { padding-top: 0 !important; }
 
+/* Fundo */
 html, body, div[data-testid="stAppViewContainer"] {
     background: radial-gradient(circle at top left, #fbe3ef, #f5d6e8, #eed0e0);
 }
 
+/* HEADER */
 .header {
     text-align: center;
     margin-top: 40px;
@@ -92,6 +95,7 @@ html, body, div[data-testid="stAppViewContainer"] {
 
 .spacing { height: 35px; }
 
+/* FORM CARD */
 .form-card {
     background: var(--white-glass);
     padding: 35px 40px;
@@ -103,27 +107,29 @@ html, body, div[data-testid="stAppViewContainer"] {
     margin: 0 auto;
 }
 
+/* Inputs */
 input, textarea {
     border-radius: 12px !important;
     border: 1px solid rgba(210,106,152,0.35) !important;
     background: #fff7fa !important;
 }
 
+/* Foco */
 input:focus, textarea:focus {
     border-color: var(--accent) !important;
     box-shadow: 0 0 8px rgba(210,106,152,0.35);
 }
 
+/* Sliders */
 .stSlider > div > div > div {
     background: var(--accent) !important;
 }
 
+/* Botão */
 .stButton > button {
     background: linear-gradient(135deg, var(--rose), var(--accent));
     padding: 14px 32px;
-    width: 60%;
-    display: block;
-    margin: 0 auto;
+    width: 100%;
     color: white !important;
     border-radius: 14px;
     border: none;
@@ -133,6 +139,7 @@ input:focus, textarea:focus {
 }
 .stButton > button:hover { transform: scale(1.05); }
 
+/* Divider */
 .divider {
     margin: 40px auto 20px auto;
     width: 60%;
@@ -147,6 +154,12 @@ input:focus, textarea:focus {
     color: var(--text-dark);
     margin-bottom: 15px;
 }
+
+/* CARD HEADER (Customizado para o botão de cada rolê) */
+/* A estilização do botão de rolê foi colocada no loop para poder usar o index.
+   Mantenho a estilização original do card-header para o caso de uso futuro, 
+   mas ela não está sendo aplicada diretamente nos botões do histórico no código original.
+   Vou remover a classe .card-header por não estar sendo usada no loop e duplicar o estilo */
 
 </style>
 """, unsafe_allow_html=True)
