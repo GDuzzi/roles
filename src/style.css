@@ -1,0 +1,27 @@
+body {
+    background: #f7f7f9;
+}
+
+.card {
+    padding: 18px;
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 6px 18px rgba(16,24,40,0.06);
+    margin-bottom: 16px;
+}
+
+.small-muted {
+    color: #6b7280;
+    font-size: 13px;
+}
+
+.stButton>button {
+    border-radius: 10px;
+    padding: 8px 14px;
+    background-color: #6C63FF !important;
+    color: white !important;
+    border: none !important;
+}
+.stButton>button:hover {
+    background-color: #584bff !important;
+}
